@@ -10,6 +10,13 @@ image_dir = '../data/example'
 output_dir = '../data/example/rotated'
 label_json_file2 = output_dir+'/label_example.json'
 
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+if not os.path.exists(os.path.join(output_dir, "image")):
+    os.makedirs(os.path.join(output_dir, "image"))
+if not os.path.exists(os.path.join(output_dir, "label")):
+    os.makedirs(os.path.join(output_dir, "label"))
+
 with open(code_file, 'r') as f:
     char_code = f.read()
 
@@ -25,7 +32,9 @@ for f in glob(image_dir+'/*.jpg'):
 
     img = cv2.imread(f)
 
-    h,w,c = img.shape
+    h,w,_ = img.shape
+
+    ctpn_gt = ''
 
     # 逆时针旋转90度
     img2 = cv2.rotate(img, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -60,7 +69,15 @@ for f in glob(image_dir+'/*.jpg'):
 
         assert len(x['code'])==len(x['transcription'])
 
-    cv2.imwrite(os.path.join(output_dir, fn), img2)
+        # 生成ctpn标注
+        ctpn_gt += ','.join([str(i) for i in x2]) + '\n'
+
+    cv2.imwrite(os.path.join(output_dir, "image", fn), img2)
+
+    # 生成 ctpn 文件
+    bfn, ext = os.path.splitext(fn)
+    with open(os.path.join(output_dir, "label", 'gt_'+bfn+'.txt'), 'w') as f:
+        f.write(ctpn_gt)
 
 
 with open(label_json_file2, 'w') as f:

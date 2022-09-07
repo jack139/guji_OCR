@@ -20,16 +20,28 @@ def orderConvex(p):
     points = np.array(points).reshape([4, 2])
     return points
 
+def orderConvex2(p):
+    points = Polygon(p).minimum_rotated_rectangle
+    points = np.array(points.exterior.coords)[:4]
+    points = points[::-1]
+    points = pickTopLeft(points)
+    points = np.array(points).reshape([4, 2])
+    p2 = np.zeros([4,2])
+    p2[0] = points[0]
+    p2[1] = points[3]
+    p2[2] = points[2]
+    p2[3] = points[1]
+    return p2
 
 def shrink_poly(poly, r=16):
     # y = kx + b
     x_min = int(np.min(poly[:, 0]))
     x_max = int(np.max(poly[:, 0]))
 
-    k1 = (poly[1][1] - poly[0][1]) / (poly[1][0] - poly[0][0])
+    k1 = (poly[1][1] - poly[0][1]) / (poly[1][0] - poly[0][0] + 1e-8)
     b1 = poly[0][1] - k1 * poly[0][0]
 
-    k2 = (poly[2][1] - poly[3][1]) / (poly[2][0] - poly[3][0])
+    k2 = (poly[2][1] - poly[3][1]) / (poly[2][0] - poly[3][0] + 1e-8)
     b2 = poly[3][1] - k2 * poly[3][0]
 
     res = []

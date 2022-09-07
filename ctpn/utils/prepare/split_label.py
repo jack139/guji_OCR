@@ -1,15 +1,16 @@
 import os
 import sys
+import traceback
 
 import cv2 as cv
 import numpy as np
 from tqdm import tqdm
 
 sys.path.append(os.getcwd())
-from utils.prepare.utils import orderConvex, shrink_poly
+from utils import orderConvex, shrink_poly, orderConvex2
 
-DATA_FOLDER = "/media/D/DataSet/mlt_selected/"
-OUTPUT = "data/dataset/mlt/"
+DATA_FOLDER = "../../../data/example/rotated/"
+OUTPUT = "../../../data/example/mlt/"
 MAX_LEN = 1200
 MIN_LEN = 600
 
@@ -53,14 +54,18 @@ for im_fn in tqdm(im_fns):
             lines = f.readlines()
         for line in lines:
             splitted_line = line.strip().lower().split(',')
-            x1, y1, x2, y2, x3, y3, x4, y4 = map(float, splitted_line[:8])
-            poly = np.array([x1, y1, x2, y2, x3, y3, x4, y4]).reshape([4, 2])
+            #x1, y1, x2, y2, x3, y3, x4, y4 = map(float, splitted_line[:8])
+            #poly = np.array([x1, y1, x2, y2, x3, y3, x4, y4]).reshape([4, 2])
+
+            xy = [item for item in map(float, splitted_line)]
+            poly = np.array(xy).reshape([len(xy)//2, 2])
             poly[:, 0] = poly[:, 0] / img_size[1] * re_size[1]
             poly[:, 1] = poly[:, 1] / img_size[0] * re_size[0]
-            poly = orderConvex(poly)
+            poly = orderConvex2(poly)
             polys.append(poly)
 
-            # cv.polylines(re_im, [poly.astype(np.int32).reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
+            #cv.polylines(re_im, [poly.astype(np.int32).reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
+
 
         res_polys = []
         for poly in polys:
@@ -69,8 +74,8 @@ for im_fn in tqdm(im_fns):
                 continue
 
             res = shrink_poly(poly)
-            # for p in res:
-            #    cv.polylines(re_im, [p.astype(np.int32).reshape((-1, 1, 2))], True, color=(0, 255, 0), thickness=1)
+            #for p in res:
+            #   cv.polylines(re_im, [p.astype(np.int32).reshape((-1, 1, 2))], True, color=(0, 255, 0), thickness=1)
 
             res = res.reshape([-1, 4, 2])
             for r in res:
@@ -81,15 +86,15 @@ for im_fn in tqdm(im_fns):
 
                 res_polys.append([x_min, y_min, x_max, y_max])
 
-        cv.imwrite(os.path.join(OUTPUT, "image", fn), re_im)
+        
         with open(os.path.join(OUTPUT, "label", bfn) + ".txt", "w") as f:
             for p in res_polys:
                 line = ",".join(str(p[i]) for i in range(4))
                 f.writelines(line + "\r\n")
-                # for p in res_polys:
-                #    cv.rectangle(re_im,(p[0],p[1]),(p[2],p[3]),color=(0,0,255),thickness=1)
+                #for p in res_polys:
+                #   cv.rectangle(re_im,(p[0],p[1]),(p[2],p[3]),color=(0,0,255),thickness=1)
 
-                # cv.imshow("demo",re_im)
-                # cv.waitKey(0)
-    except:
-        print("Error processing {}".format(im_fn))
+        cv.imwrite(os.path.join(OUTPUT, "image", fn), re_im)
+    except Exception as e:
+        print("Error processing {}".format(im_fn), e)
+        print(traceback.format_exc())
