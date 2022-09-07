@@ -1,0 +1,28 @@
+import os
+import json
+import cv2
+import numpy as np
+from glob import glob
+
+label_json_file = 'data/example/label_example.json'
+image_dir = 'data/example'
+output_dir = 'data'
+
+with open(label_json_file, 'r') as f:
+	labels = json.load(f)
+
+for f in glob(image_dir+'/*.jpg'):
+	fn = os.path.split(f)[-1] # 文件名
+
+	print(fn)
+
+	img = cv2.imread(f)
+
+	for x in labels[fn]:
+		#print(x['points'])
+		pts = np.array(x['points'], np.int32)
+		pts = pts.reshape((len(x['points'])//2,2))
+		pts = pts.reshape((-1,1,2))
+		cv2.polylines(img, [pts], True, color=(255, 0, 0), thickness=2)
+
+	cv2.imwrite(os.path.join(output_dir, 'box_'+fn), img)
