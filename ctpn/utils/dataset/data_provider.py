@@ -8,7 +8,7 @@ import numpy as np
 
 from ctpn.utils.dataset.data_util import GeneratorEnqueuer
 
-DATA_FOLDER = "data/dataset/mlt/"
+DATA_FOLDER = "data/mlt/"
 
 
 def get_training_data():

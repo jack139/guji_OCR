@@ -19,6 +19,8 @@ MIN_LEN = 600
 im_fns = os.listdir(os.path.join(DATA_FOLDER, "image"))
 im_fns.sort()
 
+if not os.path.exists(OUTPUT):
+    os.makedirs(OUTPUT)
 if not os.path.exists(os.path.join(OUTPUT, "image")):
     os.makedirs(os.path.join(OUTPUT, "image"))
 if not os.path.exists(os.path.join(OUTPUT, "label")):
@@ -76,8 +78,8 @@ for im_fn in tqdm(im_fns):
                 continue
 
             res = shrink_poly(poly)
-            for p in res:
-               cv.polylines(re_im, [p.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 0, 0), thickness=1)
+            #for p in res:
+            #   cv.polylines(re_im, [p.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 0, 0), thickness=1)
 
             res = res.reshape([-1, 4, 2])
             for r in res:
