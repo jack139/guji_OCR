@@ -9,8 +9,10 @@ from tqdm import tqdm
 sys.path.append(os.getcwd())
 from utils import orderConvex, shrink_poly, orderConvex2
 
-DATA_FOLDER = "../../../data/example/rotated/"
-OUTPUT = "../../../data/example/mlt/"
+#DATA_FOLDER = "../../../data/example/rotated/"
+#OUTPUT = "../../../data/example/mlt/"
+DATA_FOLDER = "../../../data/rotated/"
+OUTPUT = "../../../data/mlt/"
 MAX_LEN = 1200
 MIN_LEN = 600
 
@@ -74,8 +76,8 @@ for im_fn in tqdm(im_fns):
                 continue
 
             res = shrink_poly(poly)
-            #for p in res:
-            #   cv.polylines(re_im, [p.astype(np.int32).reshape((-1, 1, 2))], True, color=(0, 255, 0), thickness=1)
+            for p in res:
+               cv.polylines(re_im, [p.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 0, 0), thickness=1)
 
             res = res.reshape([-1, 4, 2])
             for r in res:

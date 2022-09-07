@@ -5,10 +5,16 @@ import numpy as np
 from glob import glob
 
 code_file = '../data/char_code.txt'
-label_json_file = '../data/example/label_example.json'
-image_dir = '../data/example'
-output_dir = '../data/example/rotated'
-label_json_file2 = output_dir+'/label_example.json'
+
+#label_json_file = '../data/example/label_example.json'
+#image_dir = '../data/example'
+#output_dir = '../data/example/rotated'
+#label_json_file2 = output_dir+'/label_example.json'
+
+label_json_file = '../data/train/label.json'
+image_dir = '../data/train/image'
+output_dir = '../data/rotated'
+label_json_file2 = output_dir+'/label.json'
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
