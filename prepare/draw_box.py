@@ -25,11 +25,6 @@ for f in glob(image_dir+'/*.jpg'):
         pts = np.array(x['points'], np.int32)
         pts = pts.reshape((len(x['points'])//2,2))
 
-        # 只画4点
-        #if len(x['points'])>8:
-        #    x3 = []
-        #    x3.extend(x['points'])
-
         pts = pts.reshape((-1,1,2))
         cv2.polylines(img, [pts], False, color=(255, 0, 0), thickness=2)
 
