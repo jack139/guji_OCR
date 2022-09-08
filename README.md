@@ -47,3 +47,12 @@ python3 -m ctpn.main.train
 ```bash
 python3 -m ctpn.main.train --restore true
 ```
+
+
+
+## CTC-Densenet训练
+
+```bash
+cd densenet/train
+python3 train.py
+```

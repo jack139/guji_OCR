@@ -29,8 +29,8 @@ batch_size = 256
 epochs = 20
 
 img_h = 32
-img_w = 280
-maxlabellength = 10
+img_w = 2642 # 最宽的图片 宽度
+maxlabellength = 50 # 训练图片最长的字数
 
 
 def get_session(gpu_fraction=1.0):
@@ -96,6 +96,9 @@ def gen(data_file, image_path, batchsize=128, maxlabellength=10, imagesize=(32, 
             img1 = Image.open(os.path.join(image_path, j)).convert('L')
             img = np.array(img1, 'f') / 255.0 - 0.5
 
+            if img.shape[1]<imagesize[1]: # 将图片扩宽到最大，不足的补零
+                img = np.hstack([img, np.zeros((imagesize[0], imagesize[1]-img.shape[1]))])
+
             x[i] = np.expand_dims(img, axis=2)
             # print('imag:shape', img.shape)
             str = image_label[j]
@@ -138,7 +141,7 @@ def get_model(img_h, nclass):
 
 
 if __name__ == '__main__':
-    char_set = open('../../data/char_std_kxzd_zk123.txt', 'r', encoding='utf-8').readlines()
+    char_set = open('../../data/char_code.txt', 'r', encoding='utf-8').readlines()
     char_set = ''.join([ch.strip('\n') for ch in char_set][1:] + ['卍'])
     nclass = len(char_set)
 
@@ -152,8 +155,8 @@ if __name__ == '__main__':
         basemodel.load_weights(modelPath)
         print('done!')
 
-    train_loader = gen('../../data/train_data/combined_train.txt', '../../data/train_data', batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
-    test_loader = gen('../../data/train_data/combined_train.txt', '../../data/train_data', batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
+    train_loader = gen('../../data/chardata/train_labels.txt', '../../data/chardata/image', batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
+    test_loader = gen('../../data/chardata/test_labels.txt', '../../data/chardata/image', batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
 
     checkpoint = ModelCheckpoint(filepath='./output/ocr-densenet-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
         monitor='val_loss', save_best_only=False, save_weights_only=True)

@@ -1,3 +1,5 @@
+# 生成densenet训练数据：文字条图片
+
 import os
 import sys
 import time

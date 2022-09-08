@@ -1,6 +1,9 @@
+# 分割训练集与验证集
+
 import os
 import random
 
+# 训练集比例
 train_ratio = 0.9
 output_dir = '../../data/chardata'
 
