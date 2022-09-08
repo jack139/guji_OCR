@@ -24,8 +24,8 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateSchedule
 from imp import reload
 import densenet
 
-start_lr = 0.0005 * 0.4**4
-batch_size = 256
+start_lr = 0.0005 #* 0.4**4
+batch_size = 32
 epochs = 20
 
 img_h = 32

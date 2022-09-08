@@ -4,7 +4,7 @@ import os
 import random
 
 # 训练集比例
-train_ratio = 0.9
+train_ratio = 0.8
 output_dir = '../../data/chardata'
 
 random.seed(1)
