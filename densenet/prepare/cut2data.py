@@ -130,6 +130,9 @@ for f in tqdm(glob(image_dir+'/*.jpg')):
     img = cv2.imread(f)
 
     for index, x in enumerate(labels[fn]):
+        if len(x['code'])==0:
+            continue
+
         # 计算 最小框的面积
         xy = [item for item in map(float, x['points'])]
         poly = np.array(xy).reshape([len(xy)//2, 2])

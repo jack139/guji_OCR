@@ -24,6 +24,9 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateSchedule
 from imp import reload
 import densenet
 
+train_data_num = 40011
+val_data_num = 50014 - train_data_num
+
 start_lr = 0.0005 #* 0.4**4
 batch_size = 32
 epochs = 20
@@ -94,11 +97,12 @@ def gen(data_file, image_path, batchsize=128, maxlabellength=10, imagesize=(32, 
         shufimagefile = _imagefile[r_n.get(batchsize)]
         for i, j in enumerate(shufimagefile):
             img1 = Image.open(os.path.join(image_path, j)).convert('L')
-            img = np.array(img1, 'f') / 255.0 - 0.5
+            img = np.array(img1, 'f')
 
             if img.shape[1]<imagesize[1]: # 将图片扩宽到最大，不足的补零
                 img = np.hstack([img, np.zeros((imagesize[0], imagesize[1]-img.shape[1]))])
 
+            img = img / 255.0 - 0.5
             x[i] = np.expand_dims(img, axis=2)
             # print('imag:shape', img.shape)
             str = image_label[j]
@@ -107,7 +111,8 @@ def gen(data_file, image_path, batchsize=128, maxlabellength=10, imagesize=(32, 
             if(len(str) <= 0):
                 print("len < 0", j)
             input_length[i] = imagesize[1] // 8
-            labels[i, :len(str)] = [int(k) - 1 for k in str]
+            #labels[i, :len(str)] = [int(k) - 1 for k in str]
+            labels[i, :len(str)] = [int(k) for k in str] # 不减1, 码表第一个不是空格
 
         inputs = {'the_input': x,
                 'the_labels': labels,
@@ -141,8 +146,12 @@ def get_model(img_h, nclass):
 
 
 if __name__ == '__main__':
+    if not os.path.exists('./output'):
+        os.makedirs('./output')
+
     char_set = open('../../data/char_code.txt', 'r', encoding='utf-8').readlines()
-    char_set = ''.join([ch.strip('\n') for ch in char_set][1:] + ['卍'])
+    #char_set = ''.join([ch.strip('\n') for ch in char_set][1:] + ['卍'])
+    char_set = ''.join([ch.strip('\n') for ch in char_set] + ['𠙶']) # 第一个码表不是空格，不跳过；码表中哟有‘卍’，不能用
     nclass = len(char_set)
 
     K.set_session(get_session())
@@ -168,12 +177,12 @@ if __name__ == '__main__':
 
     print('-----------Start training-----------')
     model.fit_generator(train_loader,
-    	steps_per_epoch = 4597567 // batch_size,
-    	epochs = epochs,
-    	initial_epoch = 0,
-    	validation_data = test_loader,
-    	validation_steps = 46440 // batch_size,
+        steps_per_epoch = train_data_num // batch_size,
+        epochs = epochs,
+        initial_epoch = 0,
+        validation_data = test_loader,
+        validation_steps = val_data_num // batch_size,
         callbacks = [checkpoint, earlystop, changelr])
-    	#callbacks = [checkpoint, earlystop, changelr, tensorboard])
+        #callbacks = [checkpoint, earlystop, changelr, tensorboard])
 
 

@@ -19,7 +19,8 @@ import tensorflow as tf
 
 
 characters = keys.alphabet[:]
-characters = characters[1:] + u'卍'
+#characters = characters[1:] + u'卍'
+characters = characters + u'𠙶'
 nclass = len(characters)
 
 # GPU内存控制
