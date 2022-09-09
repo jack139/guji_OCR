@@ -83,39 +83,49 @@ class random_uniform_num():
 
         return r_n
 
-def gen(data_file, image_path, batchsize=128, maxlabellength=10, imagesize=(32, 280)):
+def gen(data_file, image_path, nclass, batchsize=128, maxlabellength=10, imagesize=(32, 280)):
     image_label = readfile(data_file)
     _imagefile = [i for i, j in image_label.items()]
     x = np.zeros((batchsize, imagesize[0], imagesize[1], 1), dtype=np.float)
-    labels = np.ones([batchsize, maxlabellength]) * 10000
+    labels = np.ones([batchsize, maxlabellength]) * (nclass - 1) # 默认最后一个未知的label
     input_length = np.zeros([batchsize, 1])
     label_length = np.zeros([batchsize, 1])
 
     r_n = random_uniform_num(len(_imagefile))
     _imagefile = np.array(_imagefile)
     while 1:
+        max_width = 0
+        max_labellength = 0
         shufimagefile = _imagefile[r_n.get(batchsize)]
         for i, j in enumerate(shufimagefile):
             img1 = Image.open(os.path.join(image_path, j)).convert('L')
             img = np.array(img1, 'f')
 
+            max_width = max(max_width, img.shape[1])
             if img.shape[1]<imagesize[1]: # 将图片扩宽到最大，不足的补零
                 img = np.hstack([img, np.zeros((imagesize[0], imagesize[1]-img.shape[1]))])
+            assert img.shape[1]==imagesize[1]
 
             img = img / 255.0 - 0.5
             x[i] = np.expand_dims(img, axis=2)
             # print('imag:shape', img.shape)
-            str = image_label[j]
-            label_length[i] = len(str)
 
-            if(len(str) <= 0):
-                print("len < 0", j)
-            input_length[i] = imagesize[1] // 8
+            str = image_label[j]
+            max_labellength = max(max_labellength, len(str))
+            if len(str)<maxlabellength: # 将label也扩大到最大，用最后一个无用标签填充
+                str.extend([f"{nclass-1}"]*(maxlabellength-len(str)))
+            #label_length[i] = len(str)
+            assert len(str)==maxlabellength
+
+            #input_length[i] = imagesize[1] // 8
             #labels[i, :len(str)] = [int(k) - 1 for k in str]
             labels[i, :len(str)] = [int(k) for k in str] # 不减1, 码表第一个不是空格
 
-        inputs = {'the_input': x,
-                'the_labels': labels,
+        input_length = np.ones([batchsize, 1]) * max_width // 8  # 固定宽度
+        label_length = np.ones([batchsize, 1]) * max_labellength # 固定label数量
+
+        inputs = {'the_input': x[:,:,:max_width],
+                'the_labels': labels[:,:max_labellength],
                 'input_length': input_length,
                 'label_length': label_length,
                 }
@@ -158,21 +168,21 @@ if __name__ == '__main__':
     reload(densenet)
     basemodel, model = get_model(img_h, nclass)
 
-    modelPath = './output/ocr-densenet-01-0.9318-0.0749-0.9848.weights'
+    modelPath = './output/ocr-densenet-04-35.0070-35.4888-0.0000.weights___'
     if os.path.exists(modelPath):
         print("Loading model weights...", modelPath)
         basemodel.load_weights(modelPath)
         print('done!')
 
-    train_loader = gen('../../data/chardata/train_labels.txt', '../../data/chardata/image', batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
-    test_loader = gen('../../data/chardata/test_labels.txt', '../../data/chardata/image', batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
+    train_loader = gen('../../data/chardata/train_labels.txt', '../../data/chardata/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
+    test_loader = gen('../../data/chardata/test_labels.txt', '../../data/chardata/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
 
     checkpoint = ModelCheckpoint(filepath='./output/ocr-densenet-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
         monitor='val_loss', save_best_only=False, save_weights_only=True)
     lr_schedule = lambda epoch: start_lr * 0.4**epoch
     learning_rate = np.array([lr_schedule(i) for i in range(epochs)])
     changelr = LearningRateScheduler(lambda epoch: float(learning_rate[epoch]))
-    earlystop = EarlyStopping(monitor='val_loss', patience=2, verbose=1)
+    earlystop = EarlyStopping(monitor='val_loss', patience=3, verbose=1)
     #tensorboard = TensorBoard(log_dir='./output/logs', write_graph=True)
 
     print('-----------Start training-----------')
