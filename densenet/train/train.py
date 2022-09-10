@@ -24,16 +24,19 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateSchedule
 from imp import reload
 import densenet
 
-train_data_num = 40011
-val_data_num = 50014 - train_data_num
+train_data_num = 45443
+val_data_num = 4571
 
-start_lr = 0.0005 #* 0.4**4
-batch_size = 32
+start_lr = 5e-4 #* 0.4**4
+batch_size = 128
 epochs = 20
 
 img_h = 32
-img_w = 2642 # 最宽的图片 宽度
-maxlabellength = 50 # 训练图片最长的字数
+img_w = 599 # 最宽的图片 宽度
+maxlabellength = 29 # 训练图片最长的字数
+
+val_img_w = 2642 # 最宽的图片 宽度
+val_maxlabellength = 49 # 训练图片最长的字数
 
 
 def get_session(gpu_fraction=1.0):
@@ -168,16 +171,16 @@ if __name__ == '__main__':
     reload(densenet)
     basemodel, model = get_model(img_h, nclass)
 
-    modelPath = './output/ocr-densenet-04-35.0070-35.4888-0.0000.weights___'
+    modelPath = './output/ocr-densenet-01-25.6365-19.5108-0.0353.weights__'
     if os.path.exists(modelPath):
         print("Loading model weights...", modelPath)
         basemodel.load_weights(modelPath)
         print('done!')
 
     train_loader = gen('../../data/chardata/train_labels.txt', '../../data/chardata/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
-    test_loader = gen('../../data/chardata/test_labels.txt', '../../data/chardata/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
+    test_loader = gen('../../data/chardata/test_labels.txt', '../../data/chardata/image', nclass, batchsize=32, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
 
-    checkpoint = ModelCheckpoint(filepath='./output/ocr-densenet-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
+    checkpoint = ModelCheckpoint(filepath='./output/ocr-guji-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
         monitor='val_loss', save_best_only=False, save_weights_only=True)
     lr_schedule = lambda epoch: start_lr * 0.4**epoch
     learning_rate = np.array([lr_schedule(i) for i in range(epochs)])
@@ -187,11 +190,11 @@ if __name__ == '__main__':
 
     print('-----------Start training-----------')
     model.fit_generator(train_loader,
-        steps_per_epoch = train_data_num // batch_size,
+        steps_per_epoch = train_data_num // batch_size + 1,
         epochs = epochs,
         initial_epoch = 0,
         validation_data = test_loader,
-        validation_steps = val_data_num // batch_size,
+        validation_steps = val_data_num // 32,
         callbacks = [checkpoint, earlystop, changelr])
         #callbacks = [checkpoint, earlystop, changelr, tensorboard])
 
