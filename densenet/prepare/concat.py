@@ -12,6 +12,8 @@ if not os.path.exists(output_dir):
 if not os.path.exists(os.path.join(output_dir, "c_image")):
     os.makedirs(os.path.join(output_dir, "c_image"))
 
+limit_width = 600
+
 max_h, max_w = 0, 0
 
 images = []
@@ -58,7 +60,7 @@ for x in tqdm(images):
     fn = os.path.split(x[0])[-1]
     bn, _ = os.path.splitext(fn)
 
-    if c_width + img.shape[1] < max_w:
+    if c_width + img.shape[1] < limit_width:
         if c_img is None:
             c_img = img
         else:

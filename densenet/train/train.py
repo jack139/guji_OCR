@@ -24,19 +24,19 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateSchedule
 from imp import reload
 import densenet
 
-train_data_num = 45443
-val_data_num = 4571
+train_data_num = 40898
+val_data_num = 45443 - train_data_num
 
-start_lr = 5e-4 #* 0.4**4
+start_lr = 5e-4 #* 0.4**5
 batch_size = 128
-epochs = 20
+epochs = 30
 
 img_h = 32
 img_w = 599 # 最宽的图片 宽度
 maxlabellength = 29 # 训练图片最长的字数
 
-val_img_w = 2642 # 最宽的图片 宽度
-val_maxlabellength = 49 # 训练图片最长的字数
+val_img_w = 599 #2642 # 最宽的图片 宽度
+val_maxlabellength = 29 #49 # 训练图片最长的字数
 
 
 def get_session(gpu_fraction=1.0):
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     reload(densenet)
     basemodel, model = get_model(img_h, nclass)
 
-    modelPath = './output/ocr-densenet-01-25.6365-19.5108-0.0353.weights__'
+    modelPath = './output/ocr-guji-05-46.5554-33.5461-0.0000.weights'
     if os.path.exists(modelPath):
         print("Loading model weights...", modelPath)
         basemodel.load_weights(modelPath)

@@ -9,7 +9,7 @@ output_dir = '../../data/chardata'
 
 random.seed(1)
 
-with open(os.path.join(output_dir, 'c_all_labels.txt'), 'r') as f:
+with open(os.path.join(output_dir, 'f_in_labels.txt'), 'r') as f:
     new_labels = f.read().split('\n')
 
 new_labels = [i for i in new_labels if len(i)>0]

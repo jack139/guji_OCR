@@ -39,11 +39,11 @@ for f in tqdm(glob(image_dir+'/*.jpg')):
 
 
 # 保存labels
-with open(os.path.join(output_dir, "train_labels.txt"), "w") as f:
+with open(os.path.join(output_dir, "f_in_labels.txt"), "w") as f:
     for s in train_labels:
         f.write(s.strip() + '\n')
 
-with open(os.path.join(output_dir, "test_labels.txt"), "w") as f:
+with open(os.path.join(output_dir, "f_out_labels.txt"), "w") as f:
     for s in test_labels:
         f.write(s.strip() + '\n')
 
