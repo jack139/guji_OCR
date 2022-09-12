@@ -6,11 +6,6 @@ from glob import glob
 
 code_file = '../data/char_code.txt'
 
-#label_json_file = '../data/example/label_example.json'
-#image_dir = '../data/example'
-#output_dir = '../data/example/rotated'
-#label_json_file2 = output_dir+'/label_example.json'
-
 label_json_file = '../data/train/label.json'
 image_dir = '../data/train/image1' # image1 为筛选后的，去掉行书、不整齐等, 用于ctc-densenet
 output_dir = '../data/rotated1'

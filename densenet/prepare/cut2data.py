@@ -17,6 +17,10 @@ label_json_file = '../../data/rotated1/label.json'
 image_dir = '../../data/rotated1/image'
 output_dir = '../../data/chardata1'
 
+#label_json_file = '../../data/rotated/label.json'
+#image_dir = '../../data/test/1'
+#output_dir = '../../data/test'
+
 def pickTopLeft(poly):
     idx = np.argsort(poly[:, 0])
     if poly[idx[0], 1] < poly[idx[1], 1]:
@@ -25,6 +29,21 @@ def pickTopLeft(poly):
         s = idx[1]
 
     return poly[(s, (s + 1) % 4, (s + 2) % 4, (s + 3) % 4), :]
+
+def orderConvex(box):
+    assert len(box)==8
+    points = np.array(box, np.int32)
+    points = points.reshape((4,2))
+    points = points[::-1]
+    points = pickTopLeft(points)
+    points = np.array(points).reshape([4, 2])
+    p2 = np.zeros([4,2])
+    p2[0] = points[0]
+    p2[1] = points[3]
+    p2[2] = points[2]
+    p2[3] = points[1]
+    return p2
+
 
 def orderConvex2(p):
     points = Polygon(p).minimum_rotated_rectangle
@@ -93,7 +112,7 @@ def charRec(img, rec, adjust=False, save_path=None):
     partImg = dumpRotateImage(img, degree, pt1, pt2, pt3, pt4)
 
     if partImg.shape[0] < 1 or partImg.shape[1] < 1:  # 过滤异常图片
-        return False
+        return None
 
     # 调整高度为 32
     img_size = partImg.shape
@@ -107,7 +126,7 @@ def charRec(img, rec, adjust=False, save_path=None):
     if save_path:
         cv2.imwrite(save_path, re_im)
     
-    return True
+    return re_im
 
 
 if not os.path.exists(output_dir):
@@ -133,25 +152,58 @@ for f in tqdm(glob(image_dir+'/*.jpg')):
         if len(x['code'])==0:
             continue
 
-        # 计算 最小框的面积
-        xy = [item for item in map(float, x['points'])]
-        poly = np.array(xy).reshape([len(xy)//2, 2])
-        poly = orderConvex2(poly)
-        poly_rec = poly.astype(np.int32).reshape((8,)).tolist()
-
         poly_name = f'{bn}_{index}.jpg'
 
-        if charRec(img, poly_rec, adjust=False, save_path=os.path.join(output_dir, "image", poly_name)):
-            poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
+        # 计算 最小框的面积
+        #xy = [item for item in map(float, x['points'])]
+        #poly = np.array(xy).reshape([len(xy)//2, 2])
+        #poly = orderConvex2(poly)
+        #poly_rec = poly.astype(np.int32).reshape((8,)).tolist()
+
+        boxes = []
+
+        if len(x['points'])==8:
+            boxes.append(x['points'])
         else:
-            print("error cut:", poly_rec)
+            assert len(x['points'])==32
+            p = x['points']
 
-            # 画框
-            cv2.polylines(img, [poly.astype(np.int32).reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
+            # 1  2  3  4  5  6  7  8 
+            # 0 15 14 13 12 11 10  9
+            boxes.append(p[2*1:2*3] + p[2*15:] + p[:2*1]) 
+            boxes.append(p[2*2:2*4] + p[2*14:2*15] + p[2*15:])
+            boxes.append(p[2*3:2*5] + p[2*13:2*14] + p[2*14:2*15])
+            boxes.append(p[2*4:2*6] + p[2*12:2*13] + p[2*13:2*14])
+            boxes.append(p[2*5:2*7] + p[2*11:2*12] + p[2*12:2*13])
+            boxes.append(p[2*6:2*8] + p[2*10:2*11] + p[2*11:2*12])
+            boxes.append(p[2*7:2*11])
 
-            # 保存画框的图片
-            cv2.imwrite(os.path.join(output_dir, 'box_'+fn), img)
+        final_img = None
 
+        for box in boxes:
+            poly = orderConvex(box)
+            poly_rec = poly.astype(np.int32).reshape((8,)).tolist()
+
+            part_im = charRec(img, poly_rec, adjust=False)
+            if part_im is not None:
+                #poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
+                if final_img is None:
+                    final_img = part_im
+                else:
+                    final_img = cv2.hconcat([final_img, part_im])
+            else:
+                print("error cut:", box)
+
+                # 画框
+                poly = np.array(box, np.int32)
+                cv2.polylines(img, [poly.reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
+
+                # 保存画框的图片
+                cv2.imwrite(os.path.join(output_dir, 'box_'+fn), img)
+
+        cv2.imwrite(os.path.join(output_dir, "image", poly_name), final_img)
+        poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
+        
         max_length = max(max_length, len(x['code']))
 
     #break # just one round for test
