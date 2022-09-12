@@ -12,8 +12,8 @@ code_file = '../data/char_code.txt'
 #label_json_file2 = output_dir+'/label_example.json'
 
 label_json_file = '../data/train/label.json'
-image_dir = '../data/train/image'
-output_dir = '../data/rotated'
+image_dir = '../data/train/image1' # image1 为筛选后的，去掉行书、不整齐等, 用于ctc-densenet
+output_dir = '../data/rotated1'
 label_json_file2 = output_dir+'/label.json'
 
 if not os.path.exists(output_dir):

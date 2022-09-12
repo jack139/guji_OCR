@@ -24,8 +24,8 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateSchedule
 from imp import reload
 import densenet
 
-train_data_num = 40898
-val_data_num = 45443 - train_data_num
+train_data_num = 42019
+val_data_num = 3743
 
 start_lr = 5e-4 #* 0.4**5
 batch_size = 128
@@ -35,8 +35,8 @@ img_h = 32
 img_w = 599 # 最宽的图片 宽度
 maxlabellength = 29 # 训练图片最长的字数
 
-val_img_w = 599 #2642 # 最宽的图片 宽度
-val_maxlabellength = 29 #49 # 训练图片最长的字数
+val_img_w = 2642 # 最宽的图片 宽度
+val_maxlabellength = 49 # 训练图片最长的字数
 
 
 def get_session(gpu_fraction=1.0):
@@ -171,21 +171,21 @@ if __name__ == '__main__':
     reload(densenet)
     basemodel, model = get_model(img_h, nclass)
 
-    modelPath = './output/ocr-guji-05-46.5554-33.5461-0.0000.weights'
+    modelPath = './output/ocr-guji-03-53.8525-205.8718-0.0000.weights'
     if os.path.exists(modelPath):
         print("Loading model weights...", modelPath)
         basemodel.load_weights(modelPath)
         print('done!')
 
-    train_loader = gen('../../data/chardata/train_labels.txt', '../../data/chardata/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
-    test_loader = gen('../../data/chardata/test_labels.txt', '../../data/chardata/image', nclass, batchsize=32, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
+    train_loader = gen('../../data/chardata1/f_in_labels.txt', '../../data/chardata1/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
+    test_loader = gen('../../data/chardata1/f_out_labels.txt', '../../data/chardata1/image', nclass, batchsize=32, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
 
     checkpoint = ModelCheckpoint(filepath='./output/ocr-guji-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
         monitor='val_loss', save_best_only=False, save_weights_only=True)
-    lr_schedule = lambda epoch: start_lr * 0.4**epoch
+    lr_schedule = lambda epoch: start_lr * 0.8**epoch
     learning_rate = np.array([lr_schedule(i) for i in range(epochs)])
     changelr = LearningRateScheduler(lambda epoch: float(learning_rate[epoch]))
-    earlystop = EarlyStopping(monitor='val_loss', patience=3, verbose=1)
+    earlystop = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
     #tensorboard = TensorBoard(log_dir='./output/logs', write_graph=True)
 
     print('-----------Start training-----------')

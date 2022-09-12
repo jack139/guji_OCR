@@ -3,8 +3,8 @@ import cv2
 from glob import glob
 from tqdm import tqdm
 
-image_dir = '../../data/chardata/image'
-label_file = '../../data/chardata/f_in_labels.txt'
+image_dir = '../../data/chardata1/image'
+label_file = '../../data/chardata1/f_in_labels.txt'
 
 width_span = [0]*30
 label_span = [0]*10

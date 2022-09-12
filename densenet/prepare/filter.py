@@ -3,9 +3,9 @@ import cv2
 from glob import glob
 from tqdm import tqdm
 
-image_dir = '../../data/chardata/image'
-label_file = '../../data/chardata/all_labels.txt'
-output_dir = '../../data/chardata/'
+image_dir = '../../data/chardata1/image'
+label_file = '../../data/chardata1/all_labels.txt'
+output_dir = '../../data/chardata1/'
 
 filter_width = 600
 filter_label = 30
