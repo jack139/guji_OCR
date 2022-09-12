@@ -148,6 +148,8 @@ for f in tqdm(glob(image_dir+'/*.jpg')):
 
     img = cv2.imread(f)
 
+    img2 = img.copy()
+
     for index, x in enumerate(labels[fn]):
         if len(x['code'])==0:
             continue
@@ -168,15 +170,26 @@ for f in tqdm(glob(image_dir+'/*.jpg')):
             assert len(x['points'])==32
             p = x['points']
 
-            # 1  2  3  4  5  6  7  8 
-            # 0 15 14 13 12 11 10  9
-            boxes.append(p[2*1:2*3] + p[2*15:] + p[:2*1]) 
-            boxes.append(p[2*2:2*4] + p[2*14:2*15] + p[2*15:])
-            boxes.append(p[2*3:2*5] + p[2*13:2*14] + p[2*14:2*15])
-            boxes.append(p[2*4:2*6] + p[2*12:2*13] + p[2*13:2*14])
-            boxes.append(p[2*5:2*7] + p[2*11:2*12] + p[2*12:2*13])
-            boxes.append(p[2*6:2*8] + p[2*10:2*11] + p[2*11:2*12])
-            boxes.append(p[2*7:2*11])
+            if abs(p[0]-p[2]) < abs(p[1]-p[3]): # 正常
+                # 1  2  3  4  5  6  7  8 
+                # 0 15 14 13 12 11 10  9
+                boxes.append(p[2*1:2*3] + p[2*15:] + p[:2*1]) 
+                boxes.append(p[2*2:2*4] + p[2*14:2*15] + p[2*15:])
+                boxes.append(p[2*3:2*5] + p[2*13:2*14] + p[2*14:2*15])
+                boxes.append(p[2*4:2*6] + p[2*12:2*13] + p[2*13:2*14])
+                boxes.append(p[2*5:2*7] + p[2*11:2*12] + p[2*12:2*13])
+                boxes.append(p[2*6:2*8] + p[2*10:2*11] + p[2*11:2*12])
+                boxes.append(p[2*7:2*11])
+
+            else:
+                # 15   14 13 12 11 10  9  8
+                # 0  1  2  3  4  5  6     7
+                boxes.append(p[2*15:] + p[2*14:2*15] + p[2*2:2*3] + p[:2*1]) 
+                boxes.append(p[2*14:2*15] + p[2*13:2*14] + p[2*3:2*4] + p[2*2:2*3])
+                boxes.append(p[2*13:2*14] + p[2*12:2*13] + p[2*4:2*5] + p[2*3:2*4])
+                boxes.append(p[2*12:2*13] + p[2*11:2*12] + p[2*5:2*6] + p[2*4:2*5])
+                boxes.append(p[2*11:2*12] + p[2*10:2*11] + p[2*6:2*7] + p[2*5:2*6])
+                boxes.append(p[2*10:2*11] + p[2*8:2*9] + p[2*7:2*8] + p[2*6:2*7])
 
         final_img = None
 
@@ -192,14 +205,14 @@ for f in tqdm(glob(image_dir+'/*.jpg')):
                 else:
                     final_img = cv2.hconcat([final_img, part_im])
             else:
-                print("error cut:", box)
+                print("error cut:", box, poly_name)
 
                 # 画框
                 poly = np.array(box, np.int32)
-                cv2.polylines(img, [poly.reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
+                cv2.polylines(img2, [poly.reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
 
                 # 保存画框的图片
-                cv2.imwrite(os.path.join(output_dir, 'box_'+fn), img)
+                cv2.imwrite(os.path.join(output_dir, 'box_'+fn), img2)
 
         cv2.imwrite(os.path.join(output_dir, "image", poly_name), final_img)
         poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
