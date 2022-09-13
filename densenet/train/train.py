@@ -24,10 +24,10 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateSchedule
 from imp import reload
 import densenet
 
-train_data_num = 42019
-val_data_num = 3743
+train_data_num = 36596
+val_data_num = 6102
 
-start_lr = 5e-4 #* 0.4**5
+start_lr = 5e-4
 batch_size = 128
 epochs = 30
 
@@ -35,7 +35,7 @@ img_h = 32
 img_w = 599 # 最宽的图片 宽度
 maxlabellength = 29 # 训练图片最长的字数
 
-val_img_w = 2642 # 最宽的图片 宽度
+val_img_w = 2854 # 最宽的图片 宽度
 val_maxlabellength = 49 # 训练图片最长的字数
 
 
@@ -178,7 +178,7 @@ if __name__ == '__main__':
         print('done!')
 
     train_loader = gen('../../data/chardata1/f_in_labels.txt', '../../data/chardata1/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
-    test_loader = gen('../../data/chardata1/f_out_labels.txt', '../../data/chardata1/image', nclass, batchsize=32, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
+    test_loader = gen('../../data/chardata1/f_out_labels.txt', '../../data/chardata1/image', nclass, batchsize=16, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
 
     checkpoint = ModelCheckpoint(filepath='./output/ocr-guji-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
         monitor='val_loss', save_best_only=False, save_weights_only=True)
@@ -194,7 +194,7 @@ if __name__ == '__main__':
         epochs = epochs,
         initial_epoch = 0,
         validation_data = test_loader,
-        validation_steps = val_data_num // 32,
+        validation_steps = val_data_num // 16,
         callbacks = [checkpoint, earlystop, changelr])
         #callbacks = [checkpoint, earlystop, changelr, tensorboard])
 
