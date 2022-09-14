@@ -57,16 +57,16 @@ for f in glob(image_dir+'/*.jpg'):
             min_x1, min_x2 = 1e+6, 1e+6
             min_x1_idx, min_x2_idx = 0, 0
             for idx, pp in enumerate(p2):
-                if pp[0]<min_x2:
-                    min_x2 = pp[0]
-                    min_x2_idx = idx
-
                 if pp[0]<min_x1:
                     min_x2 = min_x1
                     min_x2_idx = min_x1_idx
                     min_x1 = pp[0]
                     min_x1_idx = idx
                     continue
+
+                if pp[0]<min_x2:
+                    min_x2 = pp[0]
+                    min_x2_idx = idx
 
 
             print(min_x1_idx, min_x2_idx)
