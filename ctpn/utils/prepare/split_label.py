@@ -11,7 +11,7 @@ from utils import orderConvex, shrink_poly, orderConvex2
 
 #DATA_FOLDER = "../../../data/example/rotated/"
 #OUTPUT = "../../../data/example/mlt/"
-DATA_FOLDER = "../../../data/rotated/"
+DATA_FOLDER = "../../../data/rotated1/"
 OUTPUT = "../../../data/mlt/"
 MAX_LEN = 1200
 MIN_LEN = 600
@@ -58,14 +58,13 @@ for im_fn in tqdm(im_fns):
             lines = f.readlines()
         for line in lines:
             splitted_line = line.strip().lower().split(',')
-            #x1, y1, x2, y2, x3, y3, x4, y4 = map(float, splitted_line[:8])
-            #poly = np.array([x1, y1, x2, y2, x3, y3, x4, y4]).reshape([4, 2])
-
-            xy = [item for item in map(float, splitted_line)]
-            poly = np.array(xy).reshape([len(xy)//2, 2])
+            x1, y1, x2, y2, x3, y3, x4, y4 = map(float, splitted_line[:8])
+            poly = np.array([x1, y1, x2, y2, x3, y3, x4, y4]).reshape([4, 2])
+            #xy = [item for item in map(float, splitted_line)]
+            #poly = np.array(xy).reshape([len(xy)//2, 2])
             poly[:, 0] = poly[:, 0] / img_size[1] * re_size[1]
             poly[:, 1] = poly[:, 1] / img_size[0] * re_size[0]
-            poly = orderConvex2(poly)
+            poly = orderConvex(poly)
             polys.append(poly)
 
             #cv.polylines(re_im, [poly.astype(np.int32).reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)

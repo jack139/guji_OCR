@@ -293,91 +293,93 @@ def get_boxes_32p(x):
 
 ############################################################################3
 
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-if not os.path.exists(os.path.join(output_dir, "image")):
-    os.makedirs(os.path.join(output_dir, "image"))
+if __name__ == '__main__':
 
-with open(label_json_file, 'r') as f:
-    labels = json.load(f)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    if not os.path.exists(os.path.join(output_dir, "image")):
+        os.makedirs(os.path.join(output_dir, "image"))
 
-poly_labels = []
-max_length = 0
+    with open(label_json_file, 'r') as f:
+        labels = json.load(f)
 
-for f in tqdm(glob(image_dir+'/*.jpg')):
-    fn = os.path.split(f)[-1] # 文件名
-    bn, _ = os.path.splitext(fn)
+    poly_labels = []
+    max_length = 0
 
-    #print(fn)
+    for f in tqdm(glob(image_dir+'/*.jpg')):
+        fn = os.path.split(f)[-1] # 文件名
+        bn, _ = os.path.splitext(fn)
 
-    img = cv2.imread(f)
+        #print(fn)
 
-    img2 = img.copy()
+        img = cv2.imread(f)
 
-    for index, x in enumerate(labels[fn]):
-        if len(x['code'])<1: # 忽略0个字的
-            continue
+        img2 = img.copy()
 
-        poly_name = f'{bn}_{index}.jpg'
-
-        boxes = []
-
-        if len(x['points'])==8: # 4个点的 直接截取
-            boxes.append(x['points'])
-        elif len(x['code'])<5: # 四字以下，使用最小面积的方法
-            # 计算 最小框的面积
-            xy = [item for item in map(float, x['points'])]
-            poly = np.array(xy).reshape([len(xy)//2, 2])
-            poly = orderConvex2(poly)
-            boxes.append(poly.astype(np.int32).reshape((8,)).tolist())
-        else:
-            if len(x['points'])>32: # 只取32个
-                #print(fn, x['points'])
-                x['points'] = x['points'][:32]
-
-            boxes = get_boxes_32p(x)
-            if boxes is None:
-                print(fn, "error!!!")
+        for index, x in enumerate(labels[fn]):
+            if len(x['code'])<1: # 忽略0个字的
                 continue
 
-        final_img = None
+            poly_name = f'{bn}_{index}.jpg'
 
-        for box in boxes:
-            poly = orderConvex(box)
-            poly_rec = poly.astype(np.int32).reshape((8,)).tolist()
+            boxes = []
 
-            part_im = charRec(img, poly_rec, adjust=False)
-            if part_im is not None:
-                #poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
-                if final_img is None:
-                    final_img = part_im
-                else:
-                    final_img = cv2.hconcat([final_img, part_im])
+            if len(x['points'])==8: # 4个点的 直接截取
+                boxes.append(x['points'])
+            elif len(x['code'])<5: # 四字以下，使用最小面积的方法
+                # 计算 最小框的面积
+                xy = [item for item in map(float, x['points'])]
+                poly = np.array(xy).reshape([len(xy)//2, 2])
+                poly = orderConvex2(poly)
+                boxes.append(poly.astype(np.int32).reshape((8,)).tolist())
             else:
-                #print("error cut:", box, poly_name)
+                if len(x['points'])>32: # 只取32个
+                    #print(fn, x['points'])
+                    x['points'] = x['points'][:32]
 
-                # 画框
-                poly = np.array(box, np.int32)
-                cv2.polylines(img2, [poly.reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
+                boxes = get_boxes_32p(x)
+                if boxes is None:
+                    print(fn, "error!!!")
+                    continue
 
-                # 保存画框的图片
-                cv2.imwrite(os.path.join(output_dir, 'box_'+fn), img2)
+            final_img = None
 
-        if final_img is None:
-            continue
+            for box in boxes:
+                poly = orderConvex(box)
+                poly_rec = poly.astype(np.int32).reshape((8,)).tolist()
 
-        cv2.imwrite(os.path.join(output_dir, "image", poly_name), final_img)
-        poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
-    
-        max_length = max(max_length, len(x['code']))
+                part_im = charRec(img, poly_rec, adjust=False)
+                if part_im is not None:
+                    #poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
+                    if final_img is None:
+                        final_img = part_im
+                    else:
+                        final_img = cv2.hconcat([final_img, part_im])
+                else:
+                    #print("error cut:", box, poly_name)
 
-    #break # just one round for test
+                    # 画框
+                    poly = np.array(box, np.int32)
+                    cv2.polylines(img2, [poly.reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
+
+                    # 保存画框的图片
+                    cv2.imwrite(os.path.join(output_dir, 'box_'+fn), img2)
+
+            if final_img is None:
+                continue
+
+            cv2.imwrite(os.path.join(output_dir, "image", poly_name), final_img)
+            poly_labels.append( poly_name + ' ' + ' '.join([str(a) for a in x['code']]) )
+        
+            max_length = max(max_length, len(x['code']))
+
+        #break # just one round for test
 
 
-# 保存 labels
-with open(os.path.join(output_dir, 'all_labels.txt'), 'w') as output_data:
-    for s in poly_labels:
-        output_data.write(s.strip() + '\n')
+    # 保存 labels
+    with open(os.path.join(output_dir, 'all_labels.txt'), 'w') as output_data:
+        for s in poly_labels:
+            output_data.write(s.strip() + '\n')
 
-print("\ntotal=", len(poly_labels))
-print("max_length=", max_length)
+    print("\ntotal=", len(poly_labels))
+    print("max_length=", max_length)

@@ -3,12 +3,15 @@ import json
 import cv2
 import numpy as np
 from glob import glob
+from densenet.prepare.cut2data import orderConvex2, get_boxes_32p
 
-code_file = '../data/char_code.txt'
+code_file = 'data/char_code.txt'
 
-label_json_file = '../data/train/label.json'
-image_dir = '../data/train/image1' # image1 为筛选后的，去掉行书、不整齐等, 用于ctc-densenet
-output_dir = '../data/rotated1'
+label_json_file = 'data/train/label.json'
+image_dir = 'data/train/image1' # image1 为筛选后的，去掉行书、不整齐等, 用于ctc-densenet
+output_dir = 'data/rotated1'
+#image_dir = 'data/example'
+#output_dir = 'data/example/rotated'
 label_json_file2 = output_dir+'/label.json'
 
 if not os.path.exists(output_dir):
@@ -71,7 +74,29 @@ for f in glob(image_dir+'/*.jpg'):
         assert len(x['code'])==len(x['transcription'])
 
         # 生成ctpn标注
-        ctpn_gt += ','.join([str(i) for i in x2]) + '\n'
+        #ctpn_gt += ','.join([str(i) for i in x2]) + '\n'
+
+        if len(x['points'])==8: # 4个点的 直接截取
+            ctpn_gt += ','.join([str(i) for i in x2]) + '\n'
+        elif len(x['code'])<5: # 四字以下，使用最小面积的方法
+            # 计算 最小框的面积
+            xy = [item for item in map(float, x['points'])]
+            poly = np.array(xy).reshape([len(xy)//2, 2])
+            poly = orderConvex2(poly)
+            x3 = poly.astype(np.int32).reshape((8,)).tolist()
+            ctpn_gt += ','.join([str(i) for i in x3]) + '\n'
+        else:
+            if len(x['points'])>32: # 只取32个
+                #print(fn, x['points'])
+                x['points'] = x['points'][:32]
+
+            boxes = get_boxes_32p(x)
+            if boxes is None:
+                print(fn, "error!!!", x2)
+                ctpn_gt += ','.join([str(i) for i in x2]) + '\n'
+            else:
+                for bb in boxes:
+                    ctpn_gt += ','.join([str(i) for i in bb]) + '\n'
 
     cv2.imwrite(os.path.join(output_dir, "image", fn), img2)
 

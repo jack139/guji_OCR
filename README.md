@@ -7,8 +7,7 @@
 ### 旋转图片
 
 ```bash
-cd prepare
-python3 rotate.py
+python3 -m prepare.rotate
 ```
 
 
