@@ -24,8 +24,10 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateSchedule
 from imp import reload
 import densenet
 
-train_data_num = 36596
-val_data_num = 6102
+image_path_dir = '../../data/chardata1/image'
+train_label_file = '../../data/chardata1/f_in_labels.txt'
+val_label_file = '../../data/chardata1/f_out_labels.txt'
+
 
 start_lr = 5e-4
 batch_size = 128
@@ -39,17 +41,6 @@ val_img_w = 2854 # 最宽的图片 宽度
 val_maxlabellength = 49 # 训练图片最长的字数
 
 
-def get_session(gpu_fraction=1.0):
-
-    num_threads = os.environ.get('OMP_NUM_THREADS')
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction)
-
-    if num_threads:
-        return tf.Session(config=tf.ConfigProto(
-            gpu_options=gpu_options, intra_op_parallelism_threads=num_threads))
-    else:
-        return tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
-
 def readfile(filename):
     res = []
     with open(filename, 'r') as f:
@@ -61,6 +52,23 @@ def readfile(filename):
         p = i.split(' ')
         dic[p[0]] = p[1:]
     return dic
+
+train_data_num = len(readfile(train_label_file))
+val_data_num = len(readfile(val_label_file))
+
+
+
+def get_session(gpu_fraction=1.0):
+
+    num_threads = os.environ.get('OMP_NUM_THREADS')
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction)
+
+    if num_threads:
+        return tf.Session(config=tf.ConfigProto(
+            gpu_options=gpu_options, intra_op_parallelism_threads=num_threads))
+    else:
+        return tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
 
 class random_uniform_num():
     """
@@ -177,16 +185,19 @@ if __name__ == '__main__':
         basemodel.load_weights(modelPath)
         print('done!')
 
-    train_loader = gen('../../data/chardata1/f_in_labels.txt', '../../data/chardata1/image', nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
-    test_loader = gen('../../data/chardata1/f_out_labels.txt', '../../data/chardata1/image', nclass, batchsize=16, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
+    train_loader = gen(train_label_file, image_path_dir, nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
+    test_loader = gen(val_label_file, image_path_dir, nclass, batchsize=16, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
 
     checkpoint = ModelCheckpoint(filepath='./output/ocr-guji-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
         monitor='val_loss', save_best_only=False, save_weights_only=True)
-    lr_schedule = lambda epoch: start_lr * 0.8**epoch
+    lr_schedule = lambda epoch: start_lr * 0.9**epoch
     learning_rate = np.array([lr_schedule(i) for i in range(epochs)])
     changelr = LearningRateScheduler(lambda epoch: float(learning_rate[epoch]))
     earlystop = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
     #tensorboard = TensorBoard(log_dir='./output/logs', write_graph=True)
+
+    print("train: ", train_data_num, "\tval: ", val_data_num)
+    print("lr_schedule: ", learning_rate.tolist())
 
     print('-----------Start training-----------')
     model.fit_generator(train_loader,
@@ -197,5 +208,3 @@ if __name__ == '__main__':
         validation_steps = val_data_num // 16,
         callbacks = [checkpoint, earlystop, changelr])
         #callbacks = [checkpoint, earlystop, changelr, tensorboard])
-
-
