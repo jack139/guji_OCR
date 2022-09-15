@@ -2,6 +2,7 @@ import os
 import json
 import cv2
 import numpy as np
+from tqdm import tqdm
 from glob import glob
 from densenet.prepare.cut2data import orderConvex2, get_boxes_32p
 
@@ -29,10 +30,10 @@ char_code = char_code.split('\n')
 with open(label_json_file, 'r') as f:
     labels = json.load(f)
 
-for f in glob(image_dir+'/*.jpg'):
+for f in tqdm(glob(image_dir+'/*.jpg')):
     fn = os.path.split(f)[-1] # 文件名
 
-    print(fn)
+    #print(fn)
 
     img = cv2.imread(f)
 

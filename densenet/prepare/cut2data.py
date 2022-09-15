@@ -13,13 +13,13 @@ import numpy as np
 from shapely.geometry import Polygon
 
 
-#label_json_file = '../../data/rotated1/label.json'
-#image_dir = '../../data/rotated1/image'
-#output_dir = '../../data/chardata1'
+label_json_file = '../../data/rotated1/label.json'
+image_dir = '../../data/rotated1/image'
+output_dir = '../../data/chardata1'
 
-label_json_file = '../../data/rotated/label.json'
-image_dir = '../../data/test/1'
-output_dir = '../../data/test/2'
+#label_json_file = '../../data/rotated/label.json'
+#image_dir = '../../data/test/1'
+#output_dir = '../../data/test/2'
 
 def pickTopLeft(poly):
     idx = np.argsort(poly[:, 0])

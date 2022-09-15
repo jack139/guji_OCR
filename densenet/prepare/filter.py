@@ -8,7 +8,7 @@ label_file = '../../data/chardata1/all_labels.txt'
 output_dir = '../../data/chardata1/'
 
 filter_width = 600
-filter_label = 30
+filter_label = 40
 
 # 读入 labels
 res = []

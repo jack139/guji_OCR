@@ -5,11 +5,11 @@ import random
 
 # 训练集比例
 train_ratio = 0.9
-output_dir = '../../data/chardata'
+output_dir = '../../data/chardata1'
 
 random.seed(1)
 
-with open(os.path.join(output_dir, 'f_in_labels.txt'), 'r') as f:
+with open(os.path.join(output_dir, 'all_labels.txt'), 'r') as f:
     new_labels = f.read().split('\n')
 
 new_labels = [i for i in new_labels if len(i)>0]

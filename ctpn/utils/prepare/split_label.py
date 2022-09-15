@@ -11,7 +11,7 @@ from utils import orderConvex, shrink_poly, orderConvex2
 
 #DATA_FOLDER = "../../../data/example/rotated/"
 #OUTPUT = "../../../data/example/mlt/"
-DATA_FOLDER = "../../../data/rotated1/"
+DATA_FOLDER = "../../../data/rotated/"
 OUTPUT = "../../../data/mlt/"
 MAX_LEN = 1200
 MIN_LEN = 600

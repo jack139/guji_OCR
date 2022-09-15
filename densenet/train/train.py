@@ -25,20 +25,17 @@ from imp import reload
 import densenet
 
 image_path_dir = '../../data/chardata1/image'
-train_label_file = '../../data/chardata1/f_in_labels.txt'
-val_label_file = '../../data/chardata1/f_out_labels.txt'
-
+train_label_file = '../../data/chardata1/train_labels.txt'
+val_label_file = '../../data/chardata1/test_labels.txt'
+checkpoint_dir = '../../data/checkpoints_densenet'
 
 start_lr = 5e-4
-batch_size = 128
+batch_size = 32
 epochs = 30
 
 img_h = 32
-img_w = 599 # 最宽的图片 宽度
-maxlabellength = 29 # 训练图片最长的字数
-
-val_img_w = 2854 # 最宽的图片 宽度
-val_maxlabellength = 49 # 训练图片最长的字数
+img_w = 3000 # 大于 最宽的图片 宽度
+maxlabellength = 50 # 大于 训练图片最长的字数
 
 
 def readfile(filename):
@@ -167,8 +164,8 @@ def get_model(img_h, nclass):
 
 
 if __name__ == '__main__':
-    if not os.path.exists('./output'):
-        os.makedirs('./output')
+    if not os.path.exists(checkpoint_dir):
+        os.makedirs(checkpoint_dir)
 
     char_set = open('../../data/char_code.txt', 'r', encoding='utf-8').readlines()
     #char_set = ''.join([ch.strip('\n') for ch in char_set][1:] + ['卍'])
@@ -179,22 +176,21 @@ if __name__ == '__main__':
     reload(densenet)
     basemodel, model = get_model(img_h, nclass)
 
-    modelPath = './output/ocr-guji-03-53.8525-205.8718-0.0000.weights'
+    modelPath = os.path.join(checkpoint_dir, 'ocr-guji-01-70.4131-23.4878-0.0039.weights')
     if os.path.exists(modelPath):
         print("Loading model weights...", modelPath)
         basemodel.load_weights(modelPath)
         print('done!')
 
     train_loader = gen(train_label_file, image_path_dir, nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
-    test_loader = gen(val_label_file, image_path_dir, nclass, batchsize=16, maxlabellength=val_maxlabellength, imagesize=(img_h, val_img_w))
+    test_loader = gen(val_label_file, image_path_dir, nclass, batchsize=batch_size, maxlabellength=maxlabellength, imagesize=(img_h, img_w))
 
-    checkpoint = ModelCheckpoint(filepath='./output/ocr-guji-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights', 
+    checkpoint = ModelCheckpoint(filepath=os.path.join(checkpoint_dir, 'ocr-guji-{epoch:02d}-{loss:.4f}-{val_loss:.4f}-{val_accuracy:.4f}.weights'), 
         monitor='val_loss', save_best_only=False, save_weights_only=True)
     lr_schedule = lambda epoch: start_lr * 0.9**epoch
     learning_rate = np.array([lr_schedule(i) for i in range(epochs)])
     changelr = LearningRateScheduler(lambda epoch: float(learning_rate[epoch]))
     earlystop = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
-    #tensorboard = TensorBoard(log_dir='./output/logs', write_graph=True)
 
     print("train: ", train_data_num, "\tval: ", val_data_num)
     print("lr_schedule: ", learning_rate.tolist())
@@ -205,6 +201,5 @@ if __name__ == '__main__':
         epochs = epochs,
         initial_epoch = 0,
         validation_data = test_loader,
-        validation_steps = val_data_num // 16,
+        validation_steps = val_data_num // batch_size + 1,
         callbacks = [checkpoint, earlystop, changelr])
-        #callbacks = [checkpoint, earlystop, changelr, tensorboard])

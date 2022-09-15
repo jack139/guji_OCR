@@ -4,7 +4,7 @@ from glob import glob
 from tqdm import tqdm
 
 image_dir = '../../data/chardata1/image'
-label_file = '../../data/chardata1/f_in_labels.txt'
+label_file = '../../data/chardata1/train_labels.txt'
 
 width_span = [0]*30
 label_span = [0]*10
