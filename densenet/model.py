@@ -11,7 +11,9 @@ from keras.models import Model
 from . import keys
 from train import densenet
 
-from config.settings import DENSENET_WEIGHTS, GPU_MEMORY_DENSENET, GPU_RUN_DENSENET
+DENSENET_WEIGHTS = 'data/checkpoints_densenet/ocr-guji-01-0.9318-0.0749-0.9848.weights' 
+GPU_MEMORY_DENSENET = 0.00001
+GPU_RUN_DENSENET = False
 
 reload(densenet)
 

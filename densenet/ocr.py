@@ -80,7 +80,7 @@ def charRec(img, text_recs, adjust=False, save_path=None):
 
         # 保存输入图片，用于调试
         if save_path:
-            cv2.imwrite(save_path+'part_%d.jpg'%index, partImg)
+            cv2.imwrite(os.path.join(save_path, 'part_%d.jpg'%index), partImg)
 
         # 识别
         image = Image.fromarray(partImg).convert('L')
