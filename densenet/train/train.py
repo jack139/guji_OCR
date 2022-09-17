@@ -29,7 +29,7 @@ train_label_file = '../../data/chardata1/train_labels.txt'
 val_label_file = '../../data/chardata1/test_labels.txt'
 checkpoint_dir = '../../data/checkpoints_densenet'
 
-start_lr = 5e-4
+start_lr = 2e-5
 batch_size = 32
 epochs = 30
 
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     reload(densenet)
     basemodel, model = get_model(img_h, nclass)
 
-    modelPath = os.path.join(checkpoint_dir, 'ocr-guji-01-70.4131-23.4878-0.0039.weights')
+    modelPath = os.path.join(checkpoint_dir, 'ocr-guji-24-5.9778-10.7047-0.2475.weights')
     if os.path.exists(modelPath):
         print("Loading model weights...", modelPath)
         basemodel.load_weights(modelPath)
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     lr_schedule = lambda epoch: start_lr * 0.9**epoch
     learning_rate = np.array([lr_schedule(i) for i in range(epochs)])
     changelr = LearningRateScheduler(lambda epoch: float(learning_rate[epoch]))
-    earlystop = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
+    earlystop = EarlyStopping(monitor='loss', patience=5, verbose=1)
 
     print("train: ", train_data_num, "\tval: ", val_data_num)
     print("lr_schedule: ", learning_rate.tolist())
