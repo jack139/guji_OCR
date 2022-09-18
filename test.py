@@ -60,6 +60,7 @@ def identify(filepath):
         for i in range(4):
             x2.append(h-x1[i*2+1])
             x2.append(x1[i*2])
+        x2 = x2[4:6] + x2[:4] + x2[6:]
 
         result.append({
             'pos'  : x2,
