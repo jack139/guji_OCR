@@ -105,7 +105,7 @@ def model(img, text_recs, adjust=False, save_path=None):
 
     result = charRec(image, text_recs, adjust, save_path=save_path)
 
-    print("ocr ====> {:.2f}s".format(time.time() - start))
+    #print("ocr ====> {:.2f}s".format(time.time() - start))
 
     return result
 

@@ -16,7 +16,7 @@ from ctpn.utils.rpn_msr.proposal_layer import proposal_layer
 from ctpn.utils.text_connector.detectors import TextDetector
 
 CTPN_CHECKPOINT = 'data/checkpoints_mlt/'
-GPU_MEMORY_CTPN = 0.2
+GPU_MEMORY_CTPN = 0.4
 
 tf.app.flags.DEFINE_string('output_path', 'data/tmp/', '')
 tf.app.flags.DEFINE_string('gpu', '0', '')
@@ -150,7 +150,7 @@ def process_text(im, debug=False):
     else:
         img2 = img
 
-    print("ctpn ====> {:.2f}s".format(time.time() - start))
+    #print("ctpn ====> {:.2f}s".format(time.time() - start))
 
     # 返回
     return img2, boxes  # 画框的， 原始的， 框坐标
