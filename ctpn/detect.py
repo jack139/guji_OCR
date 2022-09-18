@@ -18,7 +18,7 @@ from ctpn.utils.text_connector.detectors import TextDetector
 CTPN_CHECKPOINT = 'data/checkpoints_mlt/'
 GPU_MEMORY_CTPN = 0.2
 
-tf.app.flags.DEFINE_string('output_path', 'data/outputs/', '')
+tf.app.flags.DEFINE_string('output_path', 'data/tmp/', '')
 tf.app.flags.DEFINE_string('gpu', '0', '')
 tf.app.flags.DEFINE_string('checkpoint_path', CTPN_CHECKPOINT, '')
 FLAGS = tf.app.flags.FLAGS

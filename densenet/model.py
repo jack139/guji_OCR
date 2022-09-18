@@ -9,9 +9,9 @@ from keras.models import Model
 # import keras.backend as K
 
 from . import keys
-from train import densenet
+from .train import densenet
 
-DENSENET_WEIGHTS = 'data/checkpoints_densenet/ocr-guji-01-0.9318-0.0749-0.9848.weights' 
+DENSENET_WEIGHTS = 'data/checkpoints_densenet/ocr-guji-22-6.1834-15.4513-0.2535.weights' 
 GPU_MEMORY_DENSENET = 0.00001
 GPU_RUN_DENSENET = False
 

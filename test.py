@@ -43,7 +43,7 @@ def identify(filepath):
 
     # 定位文字位置 -- ctpn
     img2, boxes = detect.process_text(im, debug=True)
-    cv2.imwrite('data/outputs/img.jpg',img2)
+    cv2.imwrite('data/tmp/img.jpg',img2)
 
     boxes2 = boxes.copy()
 
@@ -55,7 +55,7 @@ def identify(filepath):
 
 
     # OCR 文字识别
-    rr = ocr.model(im, boxes, True)
+    rr = ocr.model(im, boxes, False, save_path='data/tmp')
     result = []
     for key in sorted(rr.keys()):
         result.append({
