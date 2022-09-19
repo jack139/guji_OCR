@@ -55,3 +55,12 @@ python3 -m ctpn.main.train --restore true
 cd densenet/train
 python3 train.py
 ```
+
+
+
+## 打榜成绩
+
+| NED     | ARD     |
+| ------- | ------- |
+| 17.8792 | 31.9111 |
+
